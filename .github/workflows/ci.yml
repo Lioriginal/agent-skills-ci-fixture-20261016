@@ -1,0 +1,41 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  quality:
+    name: Syntax, tests, build, audit
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '26'
+      # No install: this fixture has no dependencies.
+      - name: Syntax
+        run: |
+          npm run check
+          node --check baseline.test.js
+          node --check review-target.js
+          node --check scripts/check-dependencies.mjs
+      - name: Tests
+        run: npm test
+      - name: Build
+        run: npm run build
+      - name: Dependency audit
+        run: |
+          node scripts/check-dependencies.mjs
+          npm audit --offline --audit-level=high

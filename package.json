@@ -1,0 +1,1 @@
+{"name": "harmless-workflow-fixture", "version": "1.0.0", "type": "module", "scripts": {"test": "node --test", "check": "node --check functions.js", "build": "node --check functions.js"}}
